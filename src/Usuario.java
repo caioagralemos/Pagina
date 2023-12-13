@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public abstract class Usuario {
     private String nome;
@@ -18,7 +19,10 @@ public abstract class Usuario {
         this.tipo = String.valueOf(this.getClass());
     }
 
-    public boolean login(String senha) {
+    public boolean login() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Digite a senha de sua conta: ");
+        String senha = scanner.nextLine();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < senha.length(); i++) {
             char c = senha.charAt(i);
@@ -43,8 +47,8 @@ public abstract class Usuario {
         return tipo;
     }
 
-    public boolean setSenha(String senha_atual, String senha) {
-        if(login(senha_atual)) {
+    public boolean setSenha(String senha) {
+        if(login()) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < senha.length(); i++) {
                 char c = senha.charAt(i);
@@ -55,5 +59,10 @@ public abstract class Usuario {
         } else {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "@" + this.username + " - Classe: " + this.tipo;
     }
 }
