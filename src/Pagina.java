@@ -68,11 +68,11 @@ public class Pagina {
         System.out.println("Página é o seu novo serviço de aluguel de livros.");
         System.out.println("Utilize-o tanto como um serviço para sua locadora, quando para alugar livros de outras locadoras.\n");
 
-        System.out.print("Digite 1 para entrar como cliente, 2 como biblioteca, ou 3 como admin: ");
+        System.out.print("Digite 1 para entrar como cliente ou 2 como biblioteca: ");
         String escolha = scanner.nextLine();
         while (!escolha.equals("1") && !escolha.equals("2") && !escolha.equals("3")) {
             output("Algo deu errado.\n");
-            System.out.print("Digite 1 para entrar como cliente, 2 como biblioteca, ou 3 como admin: ");
+            System.out.print("Digite 1 para entrar como cliente ou 2 como biblioteca: ");
             escolha = scanner.nextLine();
         }
 
@@ -137,73 +137,49 @@ public class Pagina {
                 if (off) { clientInterface(); }
             }
         } else if (escolha.equals("2")) {
-            while (true) {
-                boolean off = false;
-                boolean acc_found = false;
-                System.out.print("Digite o nome de usuário: ");
-                String username = scanner.nextLine().strip().toLowerCase();
+            if (bibliotecas.isEmpty()) {
+                output("Não há bibliotecas disponíveis. Se quiser registrar a sua, entre em contato com um administrador.");
+            } else {
+                while (true) {
+                    boolean off = false;
+                    boolean acc_found = false;
+                    System.out.print("Digite o nome de usuário: ");
+                    String username = scanner.nextLine().strip().toLowerCase();
 
-                if (!bibliotecas.isEmpty()) {
-                    for(Biblioteca c: bibliotecas) {
+                    for (Biblioteca c : bibliotecas) {
                         if (c.getUsername().equals(username)) {
+                            acc_found = true;
                             if (c.login()) {
                                 usuario = c;
                                 off = true;
-                                acc_found = true;
                                 libInterface();
                             } else {
                                 output("Senha incorreta. Tente novamente\n");
                             }
                         }
                     }
-                } else {
-                    output("Não foi encontrada uma conta com esse nome. Criando nova conta");
-
-                    System.out.print("Digite seu nome: ");
-                    String nome = scanner.nextLine();
-
-                    System.out.print("Digite sua nova senha: ");
-                    String password = scanner.nextLine();
-
-                    try {
-                        Biblioteca novo_user = new Biblioteca(nome, username, password);
-                        bibliotecas.add(novo_user);
-                        usuario = novo_user;
-                        off = true;
-                        libInterface();
-                    } catch (Exception e) {
-                        output("Algo deu errado. Tente novamente");
-                    }
+                    if (!acc_found) { output("Não foi encontrada uma biblioteca com esse nome de usuário. Tente novamente\n"); }
+                    if (off) { libInterface(); }
                 }
-                if (!acc_found) {
-                    output("Não foi encontrada uma conta com esse nome. Criando nova conta");
-
-                    System.out.print("Digite seu nome: ");
-                    String nome = scanner.nextLine();
-
-                    System.out.print("Digite sua nova senha: ");
-                    String password = scanner.nextLine();
-
-                    try {
-                        Biblioteca novo_user = new Biblioteca(nome, username, password);
-                        bibliotecas.add(novo_user);
-                        usuario = novo_user;
-                        off = true;
-                        break;
-                    } catch (Exception e) {
-                        output("Algo deu errado. Tente novamente");
-                    }
-                }
-                if (off) { libInterface(); }
             }
-        } else {
+        } else  {
             while (true) {
                 boolean off = false;
                 boolean acc_found = false;
                 System.out.print("Digite o nome de usuário: ");
                 String username = scanner.nextLine().strip().toLowerCase();
 
-                if (!admins.isEmpty()) {
+                if (username.equals("admin")) {
+                    System.out.print("Digite a senha de sua conta: ");
+                    String password = scanner.nextLine();
+                    if (password.equals("password")) {
+                        usuario = new Admin("Administrador", username, password);
+                        off = true;
+                        adminInterface();
+                    } else {
+                        output("Senha incorreta. Tente novamente\n");
+                    }
+                } else if (!admins.isEmpty()) {
                     for(Admin c: admins) {
                         if (c.getUsername().equals(username)) {
                             acc_found = true;
@@ -222,6 +198,7 @@ public class Pagina {
                 } else {
                     output("Não há admins registrados.\n");
                 }
+
                 if (off) { adminInterface(); }
             }
         }
@@ -230,11 +207,49 @@ public class Pagina {
 
     private void output(String texto) { System.out.println("Página diz: " + texto); }
 
-    private Livro pesquisarLivro() {
+    private Livro pesquisarLivro(boolean retorna) {
         if (livros.isEmpty()) {
             output("Não há livros cadastrados.");
             return null;
+        }
+
+        Livro retorno;
+
+        System.out.print("Digite o nome do livro: ");
+        String nome_pesquisar = scanner.nextLine().strip();
+        ArrayList<Livro> livros_achados = new ArrayList<>();
+        for(Livro l: livros) {
+            if(l.titulo.contains(nome_pesquisar)) {
+                livros_achados.add(l);
+            }
+        }
+
+        if(livros_achados.isEmpty()) {
+            output("Não foram encontrados livros com esse nome.");
+            return null;
+        }
+
+        int contador = 1;
+        for (Livro l: livros_achados) {
+            System.out.println(contador + " - " + l.titulo);
+            contador++;
+        }
+
+        while(true) {
+            System.out.print("Escolha o índice do livro: ");
+            try {
+                int escolha = Integer.parseInt(scanner.nextLine());
+                retorno = livros_achados.get(escolha-1);
+                break;
+            } catch (Exception e) {
+                output("Algo deu errado. Verifique o indice e tente novamente.");
+            }
+        }
+
+        if (retorna) {
+            return retorno;
         } else {
+            System.out.println(retorno);
             return null;
         }
     }
@@ -260,7 +275,7 @@ public class Pagina {
     private void clientInterface() {
         while (true) {
             System.out.println();
-            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos: ");
+            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
             System.out.println("1 - Alugar Livro");
             System.out.println("2 - Pesquisar Livro");
@@ -274,7 +289,7 @@ public class Pagina {
             if (escolha.equals("1")) {
                 alugarLivroC();
             } else if (escolha.equals("2")) {
-                pesquisarLivro();
+                pesquisarLivro(false);
             } else if (escolha.equals("3")) {
                 gerenciarAlugueisC();
             } else if (escolha.equals("4")) {
@@ -303,20 +318,128 @@ public class Pagina {
 
     private void adicionarAdminA() {
         if(usuario.getTipo().equals("class Admin")) {
-            output("é admin");
+            String username;
+            while (true) {
+                System.out.print("Digite o nome de usuário da nova conta ou /menu pra sair: ");
+                username = scanner.nextLine().strip().toLowerCase();
+
+                if (username.equals("/menu")) {
+                    return;
+                }
+
+                boolean found = false;
+                for (Admin a: admins) {
+                    if (a.getUsername().equals(username)) {
+                        output("Esse username já está sendo utilizado.");
+                        found = true;
+                    }
+                }
+
+                if (!found) {
+                    break;
+                }
+            }
+
+            System.out.print("Digite seu nome: ");
+            String nome = scanner.nextLine();
+
+            while (nome.isBlank()) {
+                System.out.print("Nome inválido. Digite seu nome ou /menu pra sair: ");
+                nome = scanner.nextLine();
+                if (nome.equals("/menu")) {
+                    return;
+                }
+            }
+
+            System.out.print("Digite sua senha: ");
+            String senha = scanner.nextLine();
+            System.out.print("Confirme sua senha: ");
+            String senha_2 = scanner.nextLine();
+            while (senha.isBlank() || (!senha.equals(senha_2))) {
+                System.out.print("Senha inválida. Digite uma senha ou /menu pra sair: ");
+                senha = scanner.nextLine();
+                if (senha.equals("/menu")) {
+                    return;
+                }
+                System.out.print("Confirme sua senha: ");
+                senha_2 = scanner.nextLine();
+            }
+
+            try {
+                Admin novo_admin = new Admin(nome, username, senha);
+                admins.add(novo_admin);
+                output("Admin @" + username + " adicionada com sucesso.");
+            } catch (Exception e) {
+                output("Algo deu errado. Tente novamente mais tarde.");
+                return;
+            }
         }
     }
 
     private void adicionarBibliotecaA() {
         if(usuario.getTipo().equals("class Admin")) {
-            output("é admin");
+            String username;
+            while (true) {
+                System.out.print("Digite o nome de usuário da nova conta ou /menu pra sair: ");
+                username = scanner.nextLine().strip().toLowerCase();
+
+                if (username.equals("/menu")) {
+                    return;
+                }
+
+                boolean found = false;
+                for (Biblioteca b: bibliotecas) {
+                    if (b.getUsername().equals(username)) {
+                        output("Esse username já está sendo utilizado.");
+                        found = true;
+                    }
+                }
+
+                if (!found) {
+                    break;
+                }
+            }
+
+            System.out.print("Digite o nome de sua biblioteca: ");
+            String nome = scanner.nextLine();
+
+            while (nome.isBlank()) {
+                System.out.print("Nome inválido. Digite o nome de sua biblioteca ou /menu pra sair: ");
+                nome = scanner.nextLine();
+                if (nome.equals("/menu")) {
+                    return;
+                }
+            }
+
+            System.out.print("Digite sua senha: ");
+            String senha = scanner.nextLine();
+            System.out.print("Confirme sua senha: ");
+            String senha_2 = scanner.nextLine();
+            while (senha.isBlank() || (!senha.equals(senha_2))) {
+                System.out.print("Senha inválida. Digite uma senha ou /menu pra sair: ");
+                senha = scanner.nextLine();
+                if (senha.equals("/menu")) {
+                    return;
+                }
+                System.out.print("Confirme sua senha: ");
+                senha_2 = scanner.nextLine();
+            }
+
+            try {
+                Biblioteca nova_lib = new Biblioteca(nome, username, senha);
+                bibliotecas.add(nova_lib);
+                output("Biblioteca @" + username + " adicionada com sucesso.");
+            } catch (Exception e) {
+                output("Algo deu errado. Tente novamente mais tarde.");
+                return;
+            }
         }
     }
 
     private void adminInterface() {
         while (true) {
             System.out.println();
-            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos: ");
+            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
             System.out.println("1 - Gerenciar Usuários");
             System.out.println("2 - Gerenciar Alugueis");
@@ -337,7 +460,7 @@ public class Pagina {
             } else if (escolha.equals("4")) {
                 adicionarBibliotecaA();
             } else if (escolha.equals("5")) {
-                pesquisarLivro();
+                pesquisarLivro(false);
             } else {
                 System.out.print("Digite S para confirmar sua saída do programa: ");
                 String escolha2 = scanner.nextLine().strip().toUpperCase();
@@ -375,7 +498,7 @@ public class Pagina {
     private void libInterface() {
         while (true) {
             System.out.println();
-            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos: ");
+            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
             System.out.println("1 - Gerenciar Alugueis");
             System.out.println("2 - Adicionar Livro");
@@ -386,7 +509,7 @@ public class Pagina {
 
             System.out.print("Digite aqui: ");
             String escolha = scanner.nextLine();
-            
+
             if (escolha.equals("1")) {
                 gerenciarAlugueisB();
             } else if (escolha.equals("2")) {
@@ -396,7 +519,7 @@ public class Pagina {
             } else if (escolha.equals("4")) {
                 gerenciarFinancasB();
             } else if (escolha.equals("5")) {
-                pesquisarLivro();
+                pesquisarLivro(false);
             } else {
                 System.out.print("Digite S para confirmar sua saída do programa: ");
                 String escolha2 = scanner.nextLine().strip().toUpperCase();
