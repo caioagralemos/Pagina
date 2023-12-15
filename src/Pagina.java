@@ -260,7 +260,7 @@ public class Pagina {
     private void clientInterface() {
         while (true) {
             System.out.println();
-            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos: ");
+            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
             System.out.println("1 - Alugar Livro");
             System.out.println("2 - Pesquisar Livro");
@@ -316,7 +316,7 @@ public class Pagina {
     private void adminInterface() {
         while (true) {
             System.out.println();
-            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos: ");
+            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
             System.out.println("1 - Gerenciar Usuários");
             System.out.println("2 - Gerenciar Alugueis");
@@ -375,7 +375,7 @@ public class Pagina {
     private void libInterface() {
         while (true) {
             System.out.println();
-            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos: ");
+            output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
             System.out.println("1 - Gerenciar Alugueis");
             System.out.println("2 - Adicionar Livro");
