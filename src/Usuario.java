@@ -61,7 +61,6 @@ public abstract class Usuario {
         }
     }
 
-    @Override
     public String toString() {
         return "@" + this.username + " - Classe: " + this.tipo;
     }

@@ -20,4 +20,8 @@ public class Livro {
         this.qtd_disponivel = qtd_disponivel;
         this.qtd_alugados = 0;
     }
+
+    public String toString() {
+        return this.titulo + ", de " + this.autor + " e da biblioteca " + this.biblioteca.getNome() + ".";
+    }
 }
