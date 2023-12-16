@@ -199,6 +199,6 @@ public class Data {
     }
 
     public String toString() {
-        return this.dia + "/" + this.mes + "/" + this.ano + " " + this.hora + ":00";
+        return this.dia + "/" + this.mes + "/" + this.ano;
     }
 }

@@ -20,6 +20,6 @@ public class Aluguel {
     }
 
     public String toString() {
-        return "Aluguel do livro " + this.livro.titulo + " da biblioteca " + biblioteca.getNome() + " pelo cliente @" + this.cliente.getUsername() + " com prazo limite no dia " + this.limite + " e valor final de R$ " + this.valor + ".";
+        return "Aluguel do livro " + this.livro.titulo + " da biblioteca " + biblioteca.getNome() + " pelo cliente @" + this.cliente.getUsername() + " com prazo limite no dia " + this.limite + " e valor final de R$ " + this.valor + "0.";
     }
 }

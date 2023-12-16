@@ -10,9 +10,9 @@ public class Livro {
     int qtd_disponivel;
     int qtd_alugados;
 
-    public Livro(Biblioteca biblioteca, int idLivro, String titulo, String autor, int paginas, int qtd_disponivel) {
+    public Livro(Biblioteca biblioteca, ArrayList<String> categorias, int idLivro, String titulo, String autor, int paginas, int qtd_disponivel) {
         this.biblioteca = biblioteca;
-        this.categorias = new ArrayList<>();
+        this.categorias = categorias;
         this.idLivro = idLivro;
         this.titulo = titulo;
         this.autor = autor;
@@ -22,6 +22,10 @@ public class Livro {
     }
 
     public String toString() {
-        return this.titulo + ", de " + this.autor + " e da biblioteca " + this.biblioteca.getNome() + ".";
+        return this.titulo + ", de " + this.autor + " (" +this.qtd_disponivel + " disponíveis).";
+    }
+
+    public String descricao() {
+        return this.titulo + "\n    de " + this.autor + "\n    " + this.paginas + " páginas" + "\n    disponibilizado por " + this.biblioteca.getNome() + "\n    Categorias: " + this.categorias + "\n    " + this.qtd_disponivel + " livros disponíveis pra aluguel";
     }
 }
