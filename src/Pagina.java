@@ -86,10 +86,10 @@ public class Pagina {
                 if (!clientes.isEmpty()) {
                     for(Cliente c: clientes) {
                         if (c.getUsername().equals(username)) {
+                            acc_found = true;
                             if (c.login()) {
                                 usuario = c;
                                 off = true;
-                                acc_found = true;
                                 clientInterface();
                             } else {
                                 output("Senha incorreta. Tente novamente\n");
@@ -269,7 +269,7 @@ public class Pagina {
 
         int contador = 1;
         for (Livro l: livros_achados) {
-            System.out.println(contador + " - " + l.titulo);
+            System.out.println(contador + " - " + l);
             contador++;
         }
 
@@ -287,7 +287,9 @@ public class Pagina {
         if (retorna) {
             return retorno;
         } else {
-            System.out.println(retorno);
+            System.out.println();
+            output("Seu livro:");
+            System.out.println(retorno.descricao());
             return null;
         }
     }
@@ -331,9 +333,17 @@ public class Pagina {
             System.out.print("Digite S para confirmar seu aluguel: ");
             String escolha = scanner.nextLine().strip().toUpperCase();
             if (escolha.equals("S")) {
-                if (cliente.saldo >= novo.valor)  {
+                if (cliente.saldo >= novo.valor && livro.qtd_disponivel > 1)  {
                     alugueis.add(novo);
+                    cliente.alu_atuais.add(novo);
+                    biblioteca.alugueis.add(novo);
+                    biblioteca.alugou();
                     output("Aluguel feito com sucesso.");
+                    cliente.saldo = cliente.saldo - novo.valor;
+                    livro.qtd_alugados++;
+                    livro.qtd_disponivel--;
+                } else if (livro.qtd_disponivel < 1) {
+                    output("Esse livro não tem estoque suficiente.");
                 } else {
                     output("Você não tem saldo suficiente para isso.");
                 }
@@ -351,15 +361,46 @@ public class Pagina {
                 }
             }
 
-            for (Aluguel a: alugueis_cliente) {
-                System.out.println(alugueis_cliente);
+            if (!alugueis_cliente.isEmpty()) {
+                for (Aluguel a: alugueis_cliente) {
+                    System.out.println(a);
+                }
+            } else {
+                output("Você ainda não tem alugueis em curso!");
             }
         }
     }
 
     private void gerenciarContaC() {
         if(usuario.getTipo().equals("class Cliente")) {
-            output("é cliente");
+            Cliente c = (Cliente) usuario;
+            String escolha = getString("1 para alterar nome, 2 para alterar senha, 3 para consultar saldo ou 4 pra adicionar saldo", "Sua escolha");
+            if (escolha == null) {
+                return;
+            }
+            while (!escolha.equals("1") && !escolha.equals("2") && !escolha.equals("3") && !escolha.equals("4")) {
+                output("Sua escolha precisa ser entre 1, 2, 3 e 4. Tente novamente");
+                escolha = getString("1 para alterar nome, 2 para alterar senha, 3 para consultar saldo ou 4 pra adicionar saldo", "Sua escolha");
+                if (escolha == null) {
+                    return;
+                }
+            }
+
+            switch (escolha) {
+                case "1":
+                    c.setNome();
+                    break;
+                case "2":
+                    c.setSenha();
+                    break;
+                case "3":
+                    output("Seu saldo atual é de R$ " + c.saldo + "0");
+                    break;
+                case "4":
+                    int valor = getInt("o valor que deseja adicionar", "O valor");
+                    c.setSaldo(valor);
+                    output("Seu novo saldo é de R$ " + c.saldo + "0");
+            }
         }
     }
 
@@ -397,10 +438,16 @@ public class Pagina {
 
     private void gerenciarUsuariosA() {
         if(usuario.getTipo().equals("class Admin")) {
-            String escolha = getString("Digite 1 para ver os clientes, 2 para ver as bibliotecas ou 3 pra ver os Admins", "Sua escolha");
+            String escolha = getString("1 para ver os clientes, 2 para ver as bibliotecas ou 3 pra ver os Admins", "Sua escolha");
+            if (escolha == null) {
+                return;
+            }
             while (!escolha.equals("1") && !escolha.equals("2") && !escolha.equals("3")) {
                 output("Sua escolha precisa ser entre 1, 2 e 3. Tente novamente");
-                escolha = getString("Digite 1 para ver os clientes, 2 para ver as bibliotecas ou 3 pra ver os Admins", "Sua escolha");
+                escolha = getString("1 para ver os clientes, 2 para ver as bibliotecas ou 3 pra ver os Admins", "Sua escolha");
+                if (escolha == null) {
+                    return;
+                }
             }
 
             switch (escolha) {
@@ -425,7 +472,9 @@ public class Pagina {
 
     private void verAlugueisA() {
         if(usuario.getTipo().equals("class Admin")) {
-            output("é admin");
+            for (Aluguel a: alugueis) {
+                System.out.println(a);
+            }
         }
     }
 
@@ -661,7 +710,7 @@ public class Pagina {
 
             Livro l;
             try {
-                l = new Livro((Biblioteca) usuario, livros.size()+1, nome, autor, paginas, qtd);
+                l = new Livro((Biblioteca) usuario, categorias, livros.size()+1, nome, autor, paginas, qtd);
                 livros.add(l);
                 output("Livro " + nome + " adicionado com sucesso!");
             } catch (Exception e) {
@@ -678,7 +727,20 @@ public class Pagina {
 
     private void gerenciarFinancasB() {
         if(usuario.getTipo().equals("class Biblioteca")) {
-            output("é biblioteca");
+            Biblioteca b = (Biblioteca) usuario;
+            double previsto = 0;
+            for (Aluguel a: b.alugueis) {
+                previsto = previsto + a.valor + a.multa;
+            }
+            double historico = 0;
+            for (Aluguel a: b.concluidos) {
+                historico = historico + a.valor + a.multa;
+            }
+
+            output("Relatório de Lucros de " + b.getNome()  + ": ");
+            System.out.println("    Lucros de hoje: R$ " + (b.getAlugados()*3) + "0");
+            System.out.println("    Lucros totais previsto: R$ " + previsto + "0");
+            System.out.println("    Lucros totais já recebidos: R$ " + historico + "0");
         }
     }
 

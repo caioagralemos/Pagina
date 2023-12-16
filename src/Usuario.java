@@ -13,7 +13,7 @@ public abstract class Usuario {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < senha.length(); i++) {
             char c = senha.charAt(i);
-            sb.append((char)(c + i));
+            sb.append((char)(c + 5));
         }
         this.senha = sb.toString();
         this.tipo = String.valueOf(this.getClass());
@@ -26,7 +26,7 @@ public abstract class Usuario {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < senha.length(); i++) {
             char c = senha.charAt(i);
-            sb.append((char)(c + i));
+            sb.append((char)(c + 5));
         }
         return this.senha.contentEquals(sb);
     }
@@ -35,8 +35,13 @@ public abstract class Usuario {
         return nome;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setNome() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Digite seu nome ou deixe em branco para continuar com" + this.nome + ": ");
+        String nome = scanner.nextLine().strip();
+        if (!nome.isBlank()) {
+            this.nome = nome;
+        }
     }
 
     public String getUsername() {
@@ -47,15 +52,25 @@ public abstract class Usuario {
         return tipo;
     }
 
-    public boolean setSenha(String senha) {
+    public boolean setSenha() {
         if(login()) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < senha.length(); i++) {
-                char c = senha.charAt(i);
-                sb.append((char)(c + i));
+            while (true) {
+                Scanner scanner = new Scanner(System.in);
+                System.out.print("Digite sua nova senha: ");
+                String s1 = scanner.nextLine();
+                System.out.print("Confirme sua nova senha: ");
+                String s2 = scanner.nextLine();
+                if (s1.equals(s2)) {
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < s1.length(); i++) {
+                        char c = s1.charAt(i);
+                        sb.append((char)(c + 5));
+                    }
+                    System.out.println("Página diz: Senha alterada com sucesso.");
+                    this.senha = sb.toString();
+                    return true;
+                }
             }
-            this.senha = sb.toString();
-            return true;
         } else {
             return false;
         }

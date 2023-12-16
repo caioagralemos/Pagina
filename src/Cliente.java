@@ -11,4 +11,8 @@ public class Cliente extends Usuario {
         this.alu_atuais = new ArrayList<>();
         this.alu_concluidos = new ArrayList<>();
     }
+
+    public void setSaldo(double saldo) {
+        this.saldo = this.saldo + saldo;
+    }
 }
