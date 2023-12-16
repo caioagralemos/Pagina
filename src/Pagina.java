@@ -207,6 +207,44 @@ public class Pagina {
 
     private void output(String texto) { System.out.println("Página diz: " + texto); }
 
+    private String getString(String descricao) {
+        System.out.print("Digite " + descricao + ": ");
+        String resposta = scanner.nextLine().strip();
+        while (resposta.isBlank() || resposta.equals("/menu")) {
+            if (resposta.equals("/menu")) {
+                return null;
+            }
+            output(descricao + "não pode ficar em branco!");
+            System.out.print("Digite " + descricao + " ou /menu pra voltar ao menu: ");
+            resposta = scanner.nextLine().strip();
+        }
+        return resposta;
+    }
+
+    private int getInt(String descricao) {
+        String resposta;
+        int resultado;
+        while (true) {
+            try {
+                System.out.print("Digite " + descricao + ": ");
+                resposta = scanner.nextLine().strip();
+                while (resposta.isBlank() || resposta.equals("/menu")) {
+                    if (resposta.equals("/menu")) {
+                        return -1;
+                    }
+                    output(descricao + "não pode ficar em branco!");
+                    System.out.print("Digite " + descricao + " ou /menu pra voltar ao menu: ");
+                    resposta = scanner.nextLine().strip();
+                }
+                resultado = Integer.parseInt(resposta);
+                break;
+            } catch (Exception e) {
+                output("Algo deu errado, tente novamente.");
+            }
+        }
+        return resultado;
+    }
+
     private Livro pesquisarLivro(boolean retorna) {
         if (livros.isEmpty()) {
             output("Não há livros cadastrados.");
@@ -306,7 +344,7 @@ public class Pagina {
 
     private void gerenciarUsuariosA() {
         if(usuario.getTipo().equals("class Admin")) {
-            output("é admin");
+            output("Digite 1 para ver os clientes, 2 para ver as bibliotecas");
         }
     }
 
@@ -479,7 +517,71 @@ public class Pagina {
 
     private void adicionarLivroB() {
         if(usuario.getTipo().equals("class Biblioteca")) {
-            output("é biblioteca");
+            ArrayList<String> titulos = new ArrayList<>();
+            if (!livros.isEmpty()) {
+                for (Livro l: livros) {
+                    titulos.add(l.titulo);
+                }
+            }
+            System.out.print("Digite o título do seu novo livro: ");
+            String nome = scanner.nextLine().strip();
+            while (nome.isBlank() || nome.equals("/menu") || titulos.contains(nome)) {
+                if (nome.equals("/menu")) {
+                    return;
+                }
+                if (titulos.contains(nome)) {
+                    output("Esse livro já está disponível em nosso app.");
+                    return;
+                }
+                output("O titulo do livro não pode ficar em branco!");
+                System.out.print("Digite o título do seu novo livro ou /menu pra voltar ao menu: ");
+                nome = scanner.nextLine().strip();
+            }
+
+            ArrayList<String> categorias = new ArrayList<>();
+            output("Digite as categorias do livro e digite -1 quando tiver concluído: ");
+            int contador = 1;
+            while (true) {
+                System.out.print("Digite aqui (Especialidade nº" + contador + "): ");
+                String cat = scanner.nextLine().strip().toUpperCase();
+
+                if(cat.equals("-1")) {
+                    break;
+                }
+
+                if (!cat.isBlank()) {
+                    if(!categorias.contains(cat)) {
+                        contador++;
+                        categorias.add(cat);
+                    } else {
+                        output("Categoria já registrada.");
+                    }
+                }
+            }
+
+            String autor = getString("o nome do autor");
+            if (autor == null) {
+                return;
+            }
+
+            int paginas = getInt("o número de páginas");
+            if (paginas == -1) {
+                return;
+            }
+
+            int qtd = getInt("a quantidade de livros disponiveis");
+            if (qtd == -1) {
+                return;
+            }
+
+            Livro l;
+            try {
+                l = new Livro((Biblioteca) usuario, livros.size()+1, nome, autor, paginas, qtd);
+                livros.add(l);
+                output("Livro " + nome + " adicionado com sucesso!");
+            } catch (Exception e) {
+                output("Algo deu errado. Tente novamente");
+            }
         }
     }
 

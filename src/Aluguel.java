@@ -5,6 +5,7 @@ public class Aluguel {
     Biblioteca biblioteca;
     Data limite;
     boolean expirado;
+    boolean concluido;
     double valor_total;
     double multa;
 
