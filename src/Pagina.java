@@ -305,7 +305,16 @@ public class Pagina {
 
             Cliente cliente = (Cliente) this.usuario;
 
-            Biblioteca biblioteca = livro.biblioteca;
+            Biblioteca biblioteca = null;
+            for (Biblioteca b: bibliotecas) {
+                if (b.getUsername().equals(livro.biblioteca.getUsername())) {
+                    biblioteca = b;
+                }
+            }
+            if (biblioteca == null) {
+                output("Algo deu errado. Tente novamente mais tarde.");
+                return;
+            }
 
             Data data_limite;
             while (true) {
@@ -334,12 +343,13 @@ public class Pagina {
             String escolha = scanner.nextLine().strip().toUpperCase();
             if (escolha.equals("S")) {
                 if (cliente.saldo >= novo.valor && livro.qtd_disponivel > 1)  {
-                    alugueis.add(novo);
-                    biblioteca.alugou();
-                    output("Aluguel feito com sucesso.");
                     cliente.saldo = cliente.saldo - novo.valor;
                     livro.qtd_alugados++;
                     livro.qtd_disponivel--;
+                    biblioteca.livros_alugados++;
+                    biblioteca.livros_disponiveis--;
+                    alugueis.add(novo);
+                    output("Aluguel feito com sucesso.");
                 } else if (livro.qtd_disponivel < 1) {
                     output("Esse livro não tem estoque suficiente.");
                 } else {
@@ -856,7 +866,7 @@ public class Pagina {
             System.out.println();
             System.out.println("Relatório de Lucros de " + b.getNome()  + ": ");
             System.out.println("    Lucros de hoje: R$ " + b.getAlugados() + "0");
-            System.out.println("    Lucros totais previsto: R$ " + previsto + "0");
+            System.out.println("    Lucro total previsto: R$ " + previsto + "0");
             System.out.println("    Lucros totais já recebidos: R$ " + historico + "0");
         }
     }
