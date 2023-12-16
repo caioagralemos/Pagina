@@ -37,7 +37,7 @@ public abstract class Usuario {
 
     public void setNome() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Digite seu nome ou deixe em branco para continuar com" + this.nome + ": ");
+        System.out.print("Digite seu nome ou deixe em branco para continuar com " + this.nome + ": ");
         String nome = scanner.nextLine().strip();
         if (!nome.isBlank()) {
             this.nome = nome;
@@ -77,6 +77,6 @@ public abstract class Usuario {
     }
 
     public String toString() {
-        return "@" + this.username + " - Classe: " + this.tipo;
+        return "@" + this.username + " - Nome: " + this.nome;
     }
 }

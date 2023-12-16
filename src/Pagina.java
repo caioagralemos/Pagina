@@ -837,11 +837,24 @@ public class Pagina {
                 }
             } else {
                 output("Editando quantidade de livros disponíveis");
+                int atual = livro.qtd_disponivel;
                 livro.qtd_disponivel = getInt("a nova quantidade", "A quantidade de livros");
+                Biblioteca lib = null;
+                for (Biblioteca b: bibliotecas) {
+                    if (b.getUsername().equals(livro.biblioteca.getUsername())) {
+                        lib = b;
+                    }
+                }
+                if (lib == null) {
+                    output("Algo deu errado. Tente novamente");
+                    return;
+                }
+
                 while (livro.qtd_disponivel < 0) {
                     output("A quantidade de livros disponíveis não pode ser menor que 0.");
                     livro.qtd_disponivel = getInt("a nova quantidade", "A quantidade de livros");
                 }
+                lib.livros_disponiveis = lib.livros_disponiveis - atual + livro.qtd_disponivel;
                 output("Quantidade de livros atualizada com sucesso.");
             }
         }
