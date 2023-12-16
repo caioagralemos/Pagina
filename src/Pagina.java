@@ -207,21 +207,21 @@ public class Pagina {
 
     private void output(String texto) { System.out.println("Página diz: " + texto); }
 
-    private String getString(String descricao) {
+    private String getString(String descricao, String titulo) {
         System.out.print("Digite " + descricao + ": ");
         String resposta = scanner.nextLine().strip();
         while (resposta.isBlank() || resposta.equals("/menu")) {
             if (resposta.equals("/menu")) {
                 return null;
             }
-            output(descricao + "não pode ficar em branco!");
+            output(titulo + "não pode ficar em branco!");
             System.out.print("Digite " + descricao + " ou /menu pra voltar ao menu: ");
             resposta = scanner.nextLine().strip();
         }
         return resposta;
     }
 
-    private int getInt(String descricao) {
+    private int getInt(String descricao, String titulo) {
         String resposta;
         int resultado;
         while (true) {
@@ -232,7 +232,7 @@ public class Pagina {
                     if (resposta.equals("/menu")) {
                         return -1;
                     }
-                    output(descricao + "não pode ficar em branco!");
+                    output(titulo + "não pode ficar em branco!");
                     System.out.print("Digite " + descricao + " ou /menu pra voltar ao menu: ");
                     resposta = scanner.nextLine().strip();
                 }
@@ -257,7 +257,7 @@ public class Pagina {
         String nome_pesquisar = scanner.nextLine().strip();
         ArrayList<Livro> livros_achados = new ArrayList<>();
         for(Livro l: livros) {
-            if(l.titulo.contains(nome_pesquisar)) {
+            if(l.titulo.toUpperCase().contains(nome_pesquisar.toUpperCase())) {
                 livros_achados.add(l);
             }
         }
@@ -294,13 +294,66 @@ public class Pagina {
 
     private void alugarLivroC() {
         if(usuario.getTipo().equals("class Cliente")) {
-            output("é cliente");
+            int id = alugueis.size()+1;
+
+            Livro livro = pesquisarLivro(true);
+            if (livro == null) {
+                return;
+            }
+
+            Cliente cliente = (Cliente) this.usuario;
+
+            Biblioteca biblioteca = livro.biblioteca;
+
+            Data data_limite;
+            while (true) {
+                try {
+                    output("Digite o dia do final do aluguel: ");
+                    int dia = Integer.parseInt(scanner.nextLine());
+
+                    output("Digite o mês do final do aluguel: ");
+                    int mes = Integer.parseInt(scanner.nextLine());
+
+                    output("Digite o ano do final do aluguel: ");
+                    int ano = Integer.parseInt(scanner.nextLine());
+
+                    data_limite = new Data(dia, mes, ano);
+                    System.out.println();
+                    break;
+                } catch (Error e) {
+                    output("Algo deu errado. Tente novamente");
+                }
+            }
+
+            Aluguel novo = new Aluguel(id, livro, cliente, biblioteca, data_limite);
+            output("Seu novo aluguel: ");
+            System.out.println(novo);
+            System.out.print("Digite S para confirmar seu aluguel: ");
+            String escolha = scanner.nextLine().strip().toUpperCase();
+            if (escolha.equals("S")) {
+                if (cliente.saldo >= novo.valor)  {
+                    alugueis.add(novo);
+                    output("Aluguel feito com sucesso.");
+                } else {
+                    output("Você não tem saldo suficiente para isso.");
+                }
+            }
         }
     }
 
     private void gerenciarAlugueisC() {
         if(usuario.getTipo().equals("class Cliente")) {
-            output("é cliente");
+            ArrayList<Aluguel> alugueis_cliente = new ArrayList<>();
+
+            for (Aluguel a: alugueis) {
+                if (a.cliente == usuario) {
+                    alugueis_cliente.add(a);
+                }
+            }
+
+            for (Aluguel a: alugueis_cliente) {
+                System.out.println(alugueis_cliente);
+            }
         }
     }
 
@@ -344,7 +397,29 @@ public class Pagina {
 
     private void gerenciarUsuariosA() {
         if(usuario.getTipo().equals("class Admin")) {
-            output("Digite 1 para ver os clientes, 2 para ver as bibliotecas");
+            String escolha = getString("Digite 1 para ver os clientes, 2 para ver as bibliotecas ou 3 pra ver os Admins", "Sua escolha");
+            while (!escolha.equals("1") && !escolha.equals("2") && !escolha.equals("3")) {
+                output("Sua escolha precisa ser entre 1, 2 e 3. Tente novamente");
+                escolha = getString("Digite 1 para ver os clientes, 2 para ver as bibliotecas ou 3 pra ver os Admins", "Sua escolha");
+            }
+
+            switch (escolha) {
+                case "1":
+                    for (Cliente c: clientes) {
+                        System.out.println(c);
+                    }
+                    break;
+                case "2":
+                    for (Biblioteca b: bibliotecas) {
+                        System.out.println(b);
+                    }
+                    break;
+                default:
+                    for (Admin a: admins) {
+                        System.out.println(a);
+                    }
+                    break;
+            }
         }
     }
 
@@ -511,7 +586,17 @@ public class Pagina {
 
     private void gerenciarAlugueisB() {
         if(usuario.getTipo().equals("class Biblioteca")) {
-            output("é biblioteca");
+            ArrayList<Aluguel> alugueis_lib = new ArrayList<>();
+
+            for (Aluguel a: alugueis) {
+                if (a.biblioteca == usuario) {
+                    alugueis_lib.add(a);
+                }
+            }
+
+            for (Aluguel a: alugueis_lib) {
+                System.out.println(a);
+            }
         }
     }
 
@@ -559,17 +644,17 @@ public class Pagina {
                 }
             }
 
-            String autor = getString("o nome do autor");
+            String autor = getString("o nome do autor", "O nome do autor");
             if (autor == null) {
                 return;
             }
 
-            int paginas = getInt("o número de páginas");
+            int paginas = getInt("o número de páginas", "O número de páginas");
             if (paginas == -1) {
                 return;
             }
 
-            int qtd = getInt("a quantidade de livros disponiveis");
+            int qtd = getInt("a quantidade de livros disponiveis", "A quantidade de livros");
             if (qtd == -1) {
                 return;
             }

@@ -137,12 +137,20 @@ public class Data {
         if (this.dia >= 1 && this.dia < 28) {
             this.dia++;
         } else {
-            if (this.mes == 1 || this.mes == 3 || this.mes == 5 || this.mes == 7 || this.mes == 8 || this.mes == 10 || this.mes == 12) {
+            if (this.mes == 1 || this.mes == 3 || this.mes == 5 || this.mes == 7 || this.mes == 8 || this.mes == 10) {
                 if (this.dia < 31) {
                     this.dia++;
                 } else {
                     this.dia = 1;
                     this.mes++;
+                }
+            } else if (this.mes == 12) {
+                if (this.dia < 31) {
+                    this.dia++;
+                } else {
+                    this.dia = 1;
+                    this.mes = 1;
+                    this.ano++;
                 }
             } else if (this.mes == 2) {
                 if (this.ano % 4 == 0 && this.ano % 100 != 0) {
@@ -173,7 +181,7 @@ public class Data {
         int contador = 0;
         if (limite.compare(hoje)) {
             while (!limite.hoje(hoje)) {
-                limite.nextDay();
+                hoje.nextDay();
                 contador++;
             }
             return contador;
