@@ -335,8 +335,6 @@ public class Pagina {
             if (escolha.equals("S")) {
                 if (cliente.saldo >= novo.valor && livro.qtd_disponivel > 1)  {
                     alugueis.add(novo);
-                    cliente.alu_atuais.add(novo);
-                    biblioteca.alugueis.add(novo);
                     biblioteca.alugou();
                     output("Aluguel feito com sucesso.");
                     cliente.saldo = cliente.saldo - novo.valor;
@@ -356,7 +354,7 @@ public class Pagina {
             ArrayList<Aluguel> alugueis_cliente = new ArrayList<>();
 
             for (Aluguel a: alugueis) {
-                if (a.cliente == usuario) {
+                if (a.cliente.getUsername().equals(usuario.getUsername())) {
                     alugueis_cliente.add(a);
                 }
             }
@@ -379,7 +377,7 @@ public class Pagina {
                 return;
             }
             while (!escolha.equals("1") && !escolha.equals("2") && !escolha.equals("3") && !escolha.equals("4")) {
-                output("Sua escolha precisa ser entre 1, 2, 3 e 4. Tente novamente");
+                output("Sua escolha precisa ser entre 1, 2, 3 e 4, ou /menu pra sair. Tente novamente");
                 escolha = getString("1 para alterar nome, 2 para alterar senha, 3 para consultar saldo ou 4 pra adicionar saldo", "Sua escolha");
                 if (escolha == null) {
                     return;
@@ -638,13 +636,17 @@ public class Pagina {
             ArrayList<Aluguel> alugueis_lib = new ArrayList<>();
 
             for (Aluguel a: alugueis) {
-                if (a.biblioteca == usuario) {
+                if (a.biblioteca.getUsername().equals(usuario.getUsername())) {
                     alugueis_lib.add(a);
                 }
             }
 
-            for (Aluguel a: alugueis_lib) {
-                System.out.println(a);
+            if (!alugueis_lib.isEmpty()) {
+                for (Aluguel a: alugueis_lib) {
+                    System.out.println(a);
+                }
+            } else {
+                output("Seus livros ainda não foram alugados :/ Que tal publicar um novo livro?");
             }
         }
     }
@@ -711,6 +713,7 @@ public class Pagina {
             Livro l;
             try {
                 l = new Livro((Biblioteca) usuario, categorias, livros.size()+1, nome, autor, paginas, qtd);
+                ((Biblioteca) usuario).livros_disponiveis = ((Biblioteca) usuario).livros_disponiveis + qtd;
                 livros.add(l);
                 output("Livro " + nome + " adicionado com sucesso!");
             } catch (Exception e) {
@@ -721,7 +724,116 @@ public class Pagina {
 
     private void editarLivroB() {
         if(usuario.getTipo().equals("class Biblioteca")) {
-            output("é biblioteca");
+            ArrayList<Livro> livros_lib = new ArrayList<>();
+            int ctd = 1;
+            for (Livro l: livros) {
+                if(l.biblioteca.getUsername().equals(usuario.getUsername())) {
+                    if (ctd == 1) {
+                        output("Seus livros: ");
+                    }
+                    livros_lib.add(l);
+                    System.out.println(ctd + " - " + l);
+                    ctd++;
+
+                }
+            }
+            if (livros_lib.isEmpty()) {
+                output("Sua biblioteca ainda não anunciou nenhum livro.");
+                return;
+            }
+
+            int indice = getInt("o índice do livro que você quer editar", "O índice")-1;
+            while (indice < 0 || indice >= livros_lib.size()) {
+                output("Algo deu errado. Verifique sua resposta e tente novamente");
+                indice = getInt("o índice do livro que você quer editar", "O índice")-1;
+            }
+            Livro livro = livros_lib.get(indice);
+
+            String e = getString("1 para editar categorias ou 2 para editar quantidade", "Sua escolha");
+            if (e == null) {
+                return;
+            }
+            while (!e.equals("1") && !e.equals("2")) {
+                output("Escolha inválida. Digite /menu pra voltar ao menu.");
+                e = getString("1 para editar categorias ou 2 para editar quantidade", "Sua escolha");
+                if (e == null) {
+                    return;
+                }
+            }
+
+            if (e.equals("1")) {
+                System.out.print("Escolha 1 para adicionar categorias ou 2 para remover categorias: ");
+                String escolha = scanner.nextLine();
+
+                while (!escolha.equals("1") && !escolha.equals("2")) {
+                    output("Escolha inválida. Digite /menu pra voltar ao menu.");
+                    System.out.print("Escolha 1 para adicionar categorias ou 2 para remover categorias: ");
+                    escolha = scanner.nextLine();
+
+                    if(escolha.equals("/menu")) {
+                        return;
+                    }
+                }
+
+                if(escolha.equals("1")) {
+                    output("Digite as categorias do livro e digite -1 quando tiver concluído: ");
+                    int contador = livro.categorias.size()+1;
+                    while (true) {
+                        System.out.print("Digite aqui (categoria nº" + contador + "): ");
+                        String categoria = scanner.nextLine().strip().toUpperCase();
+
+                        if (categoria.equals("-1")) {
+                            break;
+                        }
+
+                        if (!categoria.isBlank()) {
+                            if (!livro.categorias.contains(categoria)) {
+                                contador++;
+                                livro.categorias.add(categoria);
+                            } else {
+                                output("O livro já possui essa categoria.");
+                            }
+                        }
+                    }
+                } else {
+                    if (livro.categorias.isEmpty()) {
+                        output("Livro não tem nenhuma categoria.");
+                        return;
+                    } else {
+                        output("Escolha a categoria do livro a ser removida: ");
+                        int c = 0;
+                        for (String d : livro.categorias) {
+                            System.out.println((c + 1) + " - " + d);
+                            c++;
+                        }
+                        int escolha2;
+                        while (true) {
+                            try {
+                                System.out.print("Digite aqui: ");
+                                escolha2 = Integer.parseInt(scanner.nextLine().strip());
+                                if (escolha2 <= (livro.categorias.size() + 1) && escolha2 > 0) {
+                                    livro.categorias.remove(escolha2 - 1);
+                                    output("Categoria removida com sucesso.");
+                                    break;
+                                } else {
+                                    throw new Exception();
+                                }
+                            } catch (Exception ignored) {
+                                output("Algo deu errado.\n");
+                                output("Escolha a categoria do livro a ser removida: ");
+                            }
+                        }
+                    }
+                }
+            } else {
+                output("Editando quantidade de livros disponíveis");
+                livro.qtd_disponivel = getInt("a nova quantidade", "A quantidade de livros");
+                while (livro.qtd_disponivel < 0) {
+                    output("A quantidade de livros disponíveis não pode ser menor que 0.");
+                    livro.qtd_disponivel = getInt("a nova quantidade", "A quantidade de livros");
+                }
+                output("Quantidade de livros atualizada com sucesso.");
+            }
         }
     }
 
@@ -729,16 +841,21 @@ public class Pagina {
         if(usuario.getTipo().equals("class Biblioteca")) {
             Biblioteca b = (Biblioteca) usuario;
             double previsto = 0;
-            for (Aluguel a: b.alugueis) {
-                previsto = previsto + a.valor + a.multa;
+            for (Aluguel a: alugueis) {
+                if (a.biblioteca.getUsername().equals(usuario.getUsername())) {
+                    previsto = previsto + a.valor + a.multa;
+                }
             }
             double historico = 0;
-            for (Aluguel a: b.concluidos) {
-                historico = historico + a.valor + a.multa;
+            for (Aluguel a: concluidos) {
+                if (a.biblioteca.getUsername().equals(usuario.getUsername())) {
+                    historico = historico + a.valor + a.multa;
+                }
             }
 
-            output("Relatório de Lucros de " + b.getNome()  + ": ");
-            System.out.println("    Lucros de hoje: R$ " + (b.getAlugados()*3) + "0");
+            System.out.println();
+            System.out.println("Relatório de Lucros de " + b.getNome()  + ": ");
+            System.out.println("    Lucros de hoje: R$ " + b.getAlugados() + "0");
             System.out.println("    Lucros totais previsto: R$ " + previsto + "0");
             System.out.println("    Lucros totais já recebidos: R$ " + historico + "0");
         }
