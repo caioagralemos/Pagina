@@ -133,6 +133,55 @@ public class Data {
         }
     }
 
+    public void nextDay() {
+        if (this.dia >= 1 && this.dia < 28) {
+            this.dia++;
+        } else {
+            if (this.mes == 1 || this.mes == 3 || this.mes == 5 || this.mes == 7 || this.mes == 8 || this.mes == 10 || this.mes == 12) {
+                if (this.dia < 31) {
+                    this.dia++;
+                } else {
+                    this.dia = 1;
+                    this.mes++;
+                }
+            } else if (this.mes == 2) {
+                if (this.ano % 4 == 0 && this.ano % 100 != 0) {
+                    this.dia = 1;
+                    this.mes++;
+                } else {
+                    if (this.dia < 29) {
+                        this.dia++;
+                    } else {
+                        this.dia = 1;
+                        this.mes++;
+                    }
+                }
+            } else {
+                if (this.dia < 30) {
+                    this.dia++;
+                } else {
+                    this.dia = 1;
+                    this.mes++;
+                }
+            }
+        }
+    }
+
+    public int daysDifference() {
+        Data hoje = new Data();
+        Data limite = this;
+        int contador = 0;
+        if (limite.compare(hoje)) {
+            while (!limite.hoje(hoje)) {
+                limite.nextDay();
+                contador++;
+            }
+            return contador;
+        } else {
+            return -1;
+        }
+    }
+
     public void setHora(int hora) {
         if (hora == 8 || hora == 9 || hora == 10 || hora == 11 || hora == 14 || hora == 15 || hora == 16 || hora == 17) {
             this.hora = hora;
