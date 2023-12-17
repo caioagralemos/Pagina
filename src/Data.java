@@ -117,6 +117,29 @@ public class Data {
         return this.ano == data2.ano && this.mes == data2.mes && this.dia == data2.dia;
     }
 
+    public String adh() {
+        Data d = new Data();
+        if (this.ano > d.ano) {
+            return "depois";
+        } else if (this.ano == d.ano) {
+            if (this.mes > d.mes) {
+                return "depois";
+            } else if (this.mes == d.mes) {
+                if (this.dia == d.dia) {
+                    return "hoje";
+                } else if (this.dia > d.dia) {
+                    return "depois";
+                } else {
+                    return "antes";
+                }
+            } else {
+                return "antes";
+            }
+        } else {
+            return "antes";
+        }
+    }
+
     public boolean compare(Data data2) {
         if (this.ano > data2.ano) {
             return true;
@@ -175,9 +198,24 @@ public class Data {
         }
     }
 
-    public int daysDifference() {
+    public int daysDifferenceF() {
         Data hoje = new Data();
         Data limite = this;
+        int contador = 0;
+        if (limite.compare(hoje)) {
+            while (!limite.hoje(hoje)) {
+                hoje.nextDay();
+                contador++;
+            }
+            return contador;
+        } else {
+            return -1;
+        }
+    }
+
+    public int daysDifferenceP() {
+        Data limite = new Data();
+        Data hoje = this;
         int contador = 0;
         if (limite.compare(hoje)) {
             while (!limite.hoje(hoje)) {

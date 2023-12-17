@@ -6,6 +6,7 @@ public abstract class Usuario {
     private String username;
     private String senha;
     private final String tipo;
+    boolean bloqueado;
 
     public Usuario(String nome, String username, String senha) {
         this.nome = nome;
@@ -17,6 +18,7 @@ public abstract class Usuario {
         }
         this.senha = sb.toString();
         this.tipo = String.valueOf(this.getClass());
+        bloqueado = false;
     }
 
     public boolean login() {

@@ -15,7 +15,6 @@ public class Pagina {
     ArrayList<Cliente> clientes = new ArrayList<>();
     ArrayList<Livro> livros = new ArrayList<>();
     ArrayList<Aluguel> alugueis = new ArrayList<>();
-    ArrayList<Aluguel> concluidos = new ArrayList<>();
     Gson gson = new Gson();
     Scanner scanner = new Scanner(System.in);
     Usuario usuario;
@@ -57,12 +56,18 @@ public class Pagina {
             alugueis = gson.fromJson(alugueis_json, new TypeToken<ArrayList<Aluguel>>(){}.getType());
         } catch (Exception ignored) {}
 
-        try {
-            Path concluidos_path = Paths.get("./data/concluidos.json");
-            byte[] concluidos_jsonData = Files.readAllBytes(concluidos_path);
-            String concluidos_json = new String(concluidos_jsonData);
-            concluidos = gson.fromJson(concluidos_json, new TypeToken<ArrayList<Aluguel>>(){}.getType());
-        } catch (Exception ignored) {}
+        ArrayList<String> devedores = new ArrayList<>();
+        for (Aluguel a: alugueis) {
+            if (a.limite.adh().equals("antes") && !a.concluido) {
+                a.multa = a.limite.daysDifferenceP()*5;
+                devedores.add(a.cliente.getUsername());
+            }
+        }
+        for (Cliente c: clientes) {
+            if (devedores.contains(c.getUsername())) {
+                c.bloqueado = true;
+            }
+        }
 
         System.out.println("\nBem vindo(a) ao Página.");
         System.out.println("Página é o seu novo serviço de aluguel de livros.");
@@ -296,14 +301,19 @@ public class Pagina {
 
     private void alugarLivroC() {
         if(usuario.getTipo().equals("class Cliente")) {
+            Cliente cliente = (Cliente) this.usuario;
+
+            if (cliente.bloqueado) {
+                output("Você deve pagar suas multas para alugar novos livros.");
+                return;
+            }
+
             int id = alugueis.size()+1;
 
             Livro livro = pesquisarLivro(true);
             if (livro == null) {
                 return;
             }
-
-            Cliente cliente = (Cliente) this.usuario;
 
             Biblioteca biblioteca = null;
             for (Biblioteca b: bibliotecas) {
@@ -361,20 +371,92 @@ public class Pagina {
 
     private void gerenciarAlugueisC() {
         if(usuario.getTipo().equals("class Cliente")) {
-            ArrayList<Aluguel> alugueis_cliente = new ArrayList<>();
-
-            for (Aluguel a: alugueis) {
-                if (a.cliente.getUsername().equals(usuario.getUsername())) {
-                    alugueis_cliente.add(a);
+            String escolha = getString("1 para ver alugueis, 2 para alugar livro ou 3 para devolver livro", "Sua escolha");
+            if (escolha == null) {
+                return;
+            }
+            while (!escolha.equals("1") && !escolha.equals("2") && !escolha.equals("3")) {
+                if (escolha == null) {
+                    return;
                 }
+                output("Algo deu errado. Tente novamente");
+                escolha = getString("1 para ver alugueis, 2 para alugar livro ou 3 para devolver livro", "Sua escolha");
             }
 
-            if (!alugueis_cliente.isEmpty()) {
-                for (Aluguel a: alugueis_cliente) {
-                    System.out.println(a);
-                }
+            if (escolha.equals("2")) {
+                alugarLivroC();
             } else {
-                output("Você ainda não tem alugueis em curso!");
+                ArrayList<Aluguel> alugueis_cliente = new ArrayList<>();
+
+                for (Aluguel a: alugueis) {
+                    if (a.cliente.getUsername().equals(usuario.getUsername())) {
+                        alugueis_cliente.add(a);
+                    }
+                }
+
+                if (alugueis_cliente.isEmpty()) {
+                    output("Você ainda não tem aluguéis registrados.");
+                } else {
+                    if (escolha.equals("1")) {
+                        System.out.println("Seus aluguéis: ");
+                        int ctd = 1;
+                        for (Aluguel a: alugueis_cliente) {
+                            System.out.println(ctd + " - " + a);
+                        }
+                    } else {
+                        System.out.println("Seus aluguéis: ");
+                        int ctd = 1;
+                        for (Aluguel a : alugueis_cliente) {
+                            System.out.println(ctd + " - " + a);
+                        }
+                        int indice = getInt("o índice do aluguel que você quer devolver", "O índice") - 1;
+                        while (indice < 0 || indice >= alugueis_cliente.size()) {
+                            output("Algo deu errado. Verifique sua resposta e tente novamente");
+                            indice = getInt("o índice do aluguel que você quer devolver", "O índice") - 1;
+                        }
+                        Aluguel aluguel = alugueis_cliente.get(indice);
+                        String situacao = aluguel.limite.adh();
+                        Cliente c = (Cliente) this.usuario;
+                        switch (situacao) {
+                            case "antes":
+                                output("Seu prazo limite era " + aluguel.limite + " e por isso você vai precisar pagar uma multa de R$ " + aluguel.multa + "0");
+                                System.out.print("Digite S para confirmar a devolução e pagar a multa: ");
+                                if (scanner.nextLine().strip().equalsIgnoreCase("s")) {
+                                    if (c.saldo >= aluguel.multa) {
+                                        c.saldo -= aluguel.multa;
+                                        c.bloqueado = false;
+                                        for (Aluguel a: alugueis) {
+                                            if (a.cliente.getUsername().equals(c.getUsername()) && a.multa > 0) {
+                                                c.bloqueado = false;
+                                            }
+                                        }
+                                        aluguel.concluido = true;
+                                        output("Multa paga e devolução efetuada com sucesso.\n");
+                                    }
+                                }
+                                break;
+                            case "depois":
+                                double valor_devolucao = aluguel.limite.daysDifferenceF() * 3;
+                                output("Seu prazo limite é " + aluguel.limite + " e por devolver antes você vai receber de volta R$ " + valor_devolucao + "0");
+                                System.out.print("Digite S para confirmar a devolução: ");
+                                if (scanner.nextLine().strip().equalsIgnoreCase("s")) {
+                                    c.saldo += valor_devolucao;
+                                    aluguel.valor -= valor_devolucao;
+                                    aluguel.limite = new Data();
+                                    aluguel.concluido = true;
+                                    output("Devolução efetuada com sucesso.");
+                                }
+                                break;
+                            default:
+                                output("Seu prazo limite para devolver esse livro é hoje!");
+                                System.out.print("Digite S para confirmar a devolução: ");
+                                if (scanner.nextLine().strip().equalsIgnoreCase("s")) {
+                                    aluguel.concluido = true;
+                                    output("Devolução efetuada com sucesso.");
+                                }
+                        }
+                    }
+                }
             }
         }
     }
@@ -865,13 +947,13 @@ public class Pagina {
             Biblioteca b = (Biblioteca) usuario;
             double previsto = 0;
             for (Aluguel a: alugueis) {
-                if (a.biblioteca.getUsername().equals(usuario.getUsername())) {
+                if (a.biblioteca.getUsername().equals(usuario.getUsername()) && !a.concluido) {
                     previsto = previsto + a.valor + a.multa;
                 }
             }
             double historico = 0;
-            for (Aluguel a: concluidos) {
-                if (a.biblioteca.getUsername().equals(usuario.getUsername())) {
+            for (Aluguel a: alugueis) {
+                if (a.biblioteca.getUsername().equals(usuario.getUsername()) && a.concluido) {
                     historico = historico + a.valor + a.multa;
                 }
             }
@@ -972,17 +1054,6 @@ public class Pagina {
                 output("Não foi possível salvar os aluguéis.");
             }
         }
-
-
-        if (!concluidos.isEmpty()) {
-            String json_concluidos = gson.toJson(concluidos);
-            try (FileWriter fileWriter = new FileWriter("./data/concluidos.json")) {
-                fileWriter.write(json_concluidos);
-            } catch (IOException e) {
-                output("Não foi possível salvar os aluguéis concluidos.");
-            }
-        }
-
 
         output("Obrigado por utilizar o Página.");
         System.exit(0);

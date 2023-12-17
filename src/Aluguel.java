@@ -14,7 +14,7 @@ public class Aluguel {
         this.cliente = cliente;
         this.biblioteca = biblioteca;
         this.limite = limite;
-        this.valor = 3 * limite.daysDifference();
+        this.valor = 3 * limite.daysDifferenceF();
         this.multa = 0;
         this.concluido = false;
     }
