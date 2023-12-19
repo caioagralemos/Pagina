@@ -242,7 +242,7 @@ public class Pagina {
             if (resposta.equals("/menu")) {
                 return null;
             }
-            output(titulo + "não pode ficar em branco!");
+            output(titulo + " não pode ficar em branco!");
             System.out.print("Digite " + descricao + " ou /menu pra voltar ao menu: ");
             resposta = scanner.nextLine().strip();
         }
@@ -260,7 +260,7 @@ public class Pagina {
                     if (resposta.equals("/menu")) {
                         return -1;
                     }
-                    output(titulo + "não pode ficar em branco!");
+                    output(titulo + " não pode ficar em branco!");
                     System.out.print("Digite " + descricao + " ou /menu pra voltar ao menu: ");
                     resposta = scanner.nextLine().strip();
                 }
@@ -339,12 +339,12 @@ public class Pagina {
             }
 
             int indice = getInt("o indice da categoria", "O indice");
-            while (indice < 0 || indice >= categorias.size()) {
+            while (indice < 0 || indice > categorias.size()) {
                 output("Algo deu errado. Tente novamente");
                 indice = getInt("o indice da categoria", "O indice");
             }
 
-            String categoria = categorias.get(indice);
+            String categoria = categorias.get(indice-1);
             ArrayList<Livro> livros_achados = new ArrayList<>();
 
             for (Livro l: livros) {
@@ -467,7 +467,20 @@ public class Pagina {
 
     private void gerenciarAlugueisC() {
         if(usuario.getTipo().equals("class Cliente")) {
-            String escolha = getString("1 para ver alugueis, 2 para alugar livro ou 3 para devolver livro", "Sua escolha");
+            ArrayList<Aluguel> alugueis_cliente = new ArrayList<>();
+
+            for (Aluguel a: alugueis) {
+                if (a.cliente.getUsername().equals(usuario.getUsername()) && !a.concluido) {
+                    alugueis_cliente.add(a);
+                }
+            }
+
+            if (alugueis_cliente.isEmpty()) {
+                output("Você ainda não tem aluguéis registrados.");
+                return;
+            }
+
+            String escolha = getString("1 para ver aluguéis, 2 para alugar livro ou 3 para devolver livro", "Sua escolha");
             if (escolha == null) {
                 return;
             }
@@ -482,14 +495,6 @@ public class Pagina {
             if (escolha.equals("2")) {
                 alugarLivroC();
             } else {
-                ArrayList<Aluguel> alugueis_cliente = new ArrayList<>();
-
-                for (Aluguel a: alugueis) {
-                    if (a.cliente.getUsername().equals(usuario.getUsername()) && !a.concluido) {
-                        alugueis_cliente.add(a);
-                    }
-                }
-
                 if (alugueis_cliente.isEmpty()) {
                     output("Você ainda não tem aluguéis registrados.");
                 } else {
@@ -674,16 +679,28 @@ public class Pagina {
 
             switch (escolha) {
                 case "1":
+                    if (clientes.isEmpty()) {
+                        output("Não há clientes cadastrados.");
+                        return;
+                    }
                     for (Cliente c: clientes) {
                         System.out.println(c);
                     }
                     break;
                 case "2":
+                    if (bibliotecas.isEmpty()) {
+                        output("Não há bibliotecas cadastradas.");
+                        return;
+                    }
                     for (Biblioteca b: bibliotecas) {
                         System.out.println(b);
                     }
                     break;
                 default:
+                    if (admins.isEmpty()) {
+                        output("Não há admins cadastrados.");
+                        return;
+                    }
                     for (Admin a: admins) {
                         System.out.println(a);
                     }
