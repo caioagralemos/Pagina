@@ -43,6 +43,7 @@ public abstract class Usuario {
         String nome = scanner.nextLine().strip();
         if (!nome.isBlank()) {
             this.nome = nome;
+            System.out.println(" Nome alterado com sucesso.");
         }
     }
 

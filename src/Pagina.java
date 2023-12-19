@@ -448,7 +448,7 @@ public class Pagina {
             System.out.print("Digite S para confirmar seu aluguel: ");
             String escolha = scanner.nextLine().strip().toUpperCase();
             if (escolha.equals("S")) {
-                if (cliente.saldo >= novo.valor && livro.qtd_disponivel > 1)  {
+                if (cliente.saldo >= novo.valor && livro.qtd_disponivel >= 1)  {
                     cliente.saldo = cliente.saldo - novo.valor;
                     livro.qtd_alugados++;
                     livro.qtd_disponivel--;
@@ -711,8 +711,11 @@ public class Pagina {
 
     private void verAlugueisA() {
         if(usuario.getTipo().equals("class Admin")) {
-            for (Aluguel a: alugueis) {
-                System.out.println(a);
+            if (!alugueis.isEmpty()) {
+                System.out.println("Todos os Aluguéis: ");
+                for (Aluguel a: alugueis) {
+                    System.out.println(a);
+                }
             }
         }
     }
@@ -883,6 +886,8 @@ public class Pagina {
             }
 
             if (!alugueis_lib.isEmpty()) {
+                System.out.println();
+                System.out.println("SEUS ALUGUÉIS: ");
                 for (Aluguel a: alugueis_lib) {
                     System.out.println(a);
                 }
