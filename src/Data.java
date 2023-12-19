@@ -5,71 +5,22 @@ public class Data {
     int dia;
     int mes;
     int ano;
-    int hora;
+
+    public Data(int dia, int mes, int ano) {
+        this.ano = ano;
+        this.mes = mes;
+        this.dia = dia;
+    }
 
     public Data() {
         Calendar cal = GregorianCalendar.getInstance();
         this.ano = cal.get(Calendar.YEAR);
         this.mes = cal.get(Calendar.MONTH) + 1;
         this.dia = cal.get(Calendar.DATE);
-        int daytime = cal.get(Calendar.AM_PM);
-        if (daytime == 0) {
-            this.hora = cal.get(Calendar.HOUR);
-        } else {
-            this.hora = cal.get(Calendar.HOUR) + 12;
-        }
     }
 
-    public Data(int dia, int mes, int ano) {
+    public Data(int dia, int mes, int ano, boolean check) {
         Calendar cal = GregorianCalendar.getInstance();
-        if (ano > cal.get(Calendar.YEAR)) {
-            this.ano = ano;
-            this.mes = mes;
-            this.dia = dia;
-        } else if (ano == cal.get(Calendar.YEAR)) {
-            if (mes == (cal.get(Calendar.MONTH) + 1)) {
-                if (mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes == 8 || mes == 10 || mes == 12) {
-                    if (dia >= cal.get(Calendar.DATE) && dia <= 31) {
-                        this.ano = ano;
-                        this.mes = mes;
-                        this.dia = dia;
-                    } else {
-                        throw new Error();
-                    }
-                } else if (mes == 4 || mes == 6 || mes == 9 || mes == 11) {
-                    if (dia >= cal.get(Calendar.DATE) && dia <= 30) {
-                        this.ano = ano;
-                        this.mes = mes;
-                        this.dia = dia;
-                    } else {
-                        throw new Error();
-                    }
-                } else {
-                    if (dia >= cal.get(Calendar.DATE) && dia <= 29) {
-                        this.ano = ano;
-                        this.mes = mes;
-                        this.dia = dia;
-                    } else {
-                        throw new Error();
-                    }
-                }
-            } else if (mes > (cal.get(Calendar.MONTH) + 1) && mes <= 12) {
-                this.ano = ano;
-                this.mes = mes;
-                this.dia = dia;
-            } else {
-                throw new Error();
-            }
-        } else {
-            throw new Error();
-        }
-    }
-
-    public Data(int dia, int mes, int ano, int hora) {
-        Calendar cal = GregorianCalendar.getInstance();
-        if (hora >= 0 && hora < 24) {
-            this.hora = hora;
-        }
         if (ano > cal.get(Calendar.YEAR)) {
             this.ano = ano;
             this.mes = mes;
@@ -204,8 +155,8 @@ public class Data {
         int contador = 0;
         if (limite.compare(hoje)) {
             while (!limite.hoje(hoje)) {
-                hoje.nextDay();
                 contador++;
+                hoje.nextDay();
             }
             return contador;
         } else {
@@ -215,24 +166,16 @@ public class Data {
 
     public int daysDifferenceP() {
         Data limite = new Data();
-        Data hoje = this;
+        Data hoje = new Data(this.dia, this.mes, this.ano);
         int contador = 0;
         if (limite.compare(hoje)) {
             while (!limite.hoje(hoje)) {
-                hoje.nextDay();
                 contador++;
+                hoje.nextDay();
             }
             return contador;
         } else {
             return -1;
-        }
-    }
-
-    public void setHora(int hora) {
-        if (hora == 8 || hora == 9 || hora == 10 || hora == 11 || hora == 14 || hora == 15 || hora == 16 || hora == 17) {
-            this.hora = hora;
-        } else {
-            throw new Error();
         }
     }
 
