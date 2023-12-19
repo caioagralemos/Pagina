@@ -20,6 +20,11 @@ public class Aluguel {
     }
 
     public String toString() {
-        return "(ID Nº" + this.id_aluguel + ") Aluguel do livro " + this.livro.titulo + " da biblioteca " + biblioteca.getNome() + " pelo cliente @" + this.cliente.getUsername() + " com prazo limite no dia " + this.limite + " e valor final de R$ " + this.valor + "0.";
+        String original = "(ID Nº" + this.id_aluguel + ") Aluguel do livro " + this.livro.titulo + " da biblioteca " + biblioteca.getNome() + " pelo cliente @" + this.cliente.getUsername() + " com prazo limite no dia " + this.limite + " e valor final de R$ " + this.valor + "0.";
+        if (this.limite.adh().equals("antes")) {
+            return "(ATRASADO) " + original;
+        } else {
+            return original;
+        }
     }
 }

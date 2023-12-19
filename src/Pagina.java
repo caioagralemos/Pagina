@@ -3,7 +3,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -280,36 +279,100 @@ public class Pagina {
             return null;
         }
 
-        Livro retorno;
-
-        System.out.print("Digite o nome do livro: ");
-        String nome_pesquisar = scanner.nextLine().strip();
-        ArrayList<Livro> livros_achados = new ArrayList<>();
-        for(Livro l: livros) {
-            if(l.titulo.toUpperCase().contains(nome_pesquisar.toUpperCase())) {
-                livros_achados.add(l);
+        String e = getString("1 para pesquisar por nome ou 2 por categoria", "Sua escolha");
+        while (!e.equals("1") && !e.equals("2")) {
+            if (e == null) {
+                return null;
             }
+            output("Algo deu errado! Tente novamente");
+            e = getString("1 para pesquisar por nome ou 2 por categoria", "Sua escolha");
         }
 
-        if(livros_achados.isEmpty()) {
-            output("Não foram encontrados livros com esse nome.");
-            return null;
-        }
+        Livro retorno = null;
 
-        int contador = 1;
-        for (Livro l: livros_achados) {
-            System.out.println(contador + " - " + l);
-            contador++;
-        }
+        if (e.equals("1")) {
+            System.out.print("Digite o nome do livro: ");
+            String nome_pesquisar = scanner.nextLine().strip();
+            ArrayList<Livro> livros_achados = new ArrayList<>();
+            for(Livro l: livros) {
+                if(l.titulo.toUpperCase().contains(nome_pesquisar.toUpperCase()) && l.qtd_disponivel > 0) {
+                    livros_achados.add(l);
+                }
+            }
 
-        while(true) {
-            System.out.print("Escolha o índice do livro: ");
-            try {
-                int escolha = Integer.parseInt(scanner.nextLine());
-                retorno = livros_achados.get(escolha-1);
-                break;
-            } catch (Exception e) {
-                output("Algo deu errado. Verifique o indice e tente novamente.");
+            if(livros_achados.isEmpty()) {
+                output("Não foram encontrados livros com esse nome.");
+                return null;
+            }
+
+            int contador = 1;
+            for (Livro l: livros_achados) {
+                System.out.println(contador + " - " + l);
+                contador++;
+            }
+
+            while(true) {
+                System.out.print("Escolha o índice do livro: ");
+                try {
+                    int escolha = Integer.parseInt(scanner.nextLine());
+                    retorno = livros_achados.get(escolha-1);
+                    break;
+                } catch (Exception ignored) {
+                    output("Algo deu errado. Verifique o indice e tente novamente.");
+                }
+            }
+        } else {
+            ArrayList<String> categorias = new ArrayList<>();
+            for (Livro l: livros) {
+                for (String c: l.categorias) {
+                    if (!categorias.contains(c)) {
+                        categorias.add(c);
+                    }
+                }
+            }
+
+            System.out.println("Categorias disponíveis: ");
+            int ctd = 1;
+            for (String c: categorias) {
+                System.out.println(ctd + " - " + c);
+                ctd++;
+            }
+
+            int indice = getInt("o indice da categoria", "O indice");
+            while (indice < 0 || indice >= categorias.size()) {
+                output("Algo deu errado. Tente novamente");
+                indice = getInt("o indice da categoria", "O indice");
+            }
+
+            String categoria = categorias.get(indice);
+            ArrayList<Livro> livros_achados = new ArrayList<>();
+
+            for (Livro l: livros) {
+                if (l.categorias.contains(categoria) && l.qtd_disponivel > 0) {
+                    livros_achados.add(l);
+                }
+            }
+
+            if (livros_achados.isEmpty()) {
+                output("Não foi encontrado nenhum livro com essa categoria.");
+                return null;
+            } else {
+                ctd = 1;
+                for (Livro l: livros_achados) {
+                    System.out.println(ctd + " - " + l);
+                    ctd++;
+                }
+            }
+
+            while(true) {
+                System.out.print("Escolha o índice do livro: ");
+                try {
+                    int escolha = Integer.parseInt(scanner.nextLine());
+                    retorno = livros_achados.get(escolha-1);
+                    break;
+                } catch (Exception ignored) {
+                    output("Algo deu errado. Verifique o indice e tente novamente.");
+                }
             }
         }
 
@@ -548,6 +611,23 @@ public class Pagina {
 
     private void clientInterface() {
         while (true) {
+            ArrayList<String> pendentes = new ArrayList<>();
+            int ctd = 1;
+            for (Aluguel a: alugueis) {
+                if (a.cliente.getUsername().equals(usuario.getUsername()) && (a.limite.adh().equals("antes") || a.limite.adh().equals("hoje")) && !a.concluido) {
+                    pendentes.add(ctd + " - " + a);
+                    ctd++;
+                }
+            }
+
+            if (!pendentes.isEmpty()) {
+                System.out.println();
+                output("Você tem devoluções pendentes!");
+                for (String s: pendentes) {
+                    System.out.println(s);
+                }
+            }
+
             System.out.println();
             output("Olá, " + this.usuario.getNome() + "! Você pode me controlar usando os seguintes comandos:\n");
 
